@@ -10,9 +10,9 @@
 ## 環境設定
 剛開始學習語言，最容易被打擊的就是環境設定了，這邊分享一下我的設定。我使用的是 macOS。
 
-安裝 racket：使用 brew cask racket
+安裝 racket：使用 "brew cask install racket"
 
-安裝 racket 的 berkley 套件：會用到 Berkley 提供的函數，下載這個 repo 的 berkley.zip 後，在終端輸入 sudo raco pkg install berkeley。
+安裝 racket 的 berkley 套件：會用到 Berkley 提供的函數，下載這個 repo 的 berkley.zip 後，在終端輸入 "sudo raco pkg install berkeley"。
 
 編輯器：受到[Scheme 编程环境的设置](http://www.yinwang.org/blog-cn/2013/04/11/scheme-setup)啟發，這邊推薦[spacemacs](https://github.com/syl20bnr/spacemacs) 的 evil mode，比 Rakcet 自帶的好用多了，不過要稍微調教以及學習一下。首先安裝 raket layers，[並安裝 lispy 套件](https://github.com/abo-abo/lispy/pull/174)，把文檔的 clojure 改成 racket 。
 
