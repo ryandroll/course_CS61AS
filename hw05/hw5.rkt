@@ -72,35 +72,42 @@
     (else (cons (tree-map fn (car tree)) (tree-map fn (cdr tree))))))
 
 ;Exercise 4 -  Complete the definition of accumulate-n
+;; 啊哈，用其他 HOF
 
 (define (accumulate-n op init seqs)
   (if (null? (car seqs))
       '()
-      (cons (foldr op init "YOUR CODE HERE")
-            (accumulate-n op init "YOUR CODE HERE"))))
+      (cons (foldr op init (map car seqs))
+            (accumulate-n op init (map cdr seqs)))))
 
 ;Exercise 5 - Complete the definitions of matrix-*-vector, transpose,
 ; and matrix-*-matrix.
+;; It's a very good pratice for HOF for list.
+;; Matrix to matrix  use the nested-map concept
 
 (define (dot-product v w)
   (foldr + 0 (map * v w)))
 
 (define (matrix-*-vector m v)
-  (map "YOUR CODE HERE" m))
+  (map (lambda (x) (dot-product v x)) m))
 
 (define (transpose mat)
-  (accumulate-n "YOUR CODE HERE" "YOUR CODE HERE" mat))
+  (accumulate-n cons '() mat))
 
 (define (matrix-*-matrix m n)
   (let ((cols (transpose n)))
-    (map "YOUR CODE HERE" m)))
+    (map (lambda (x)
+           (map (lambda (y)
+                  (dot-product x y))
+                cols))
+         m)))
 
 
 ;Exercise 6 - Give the property that op should satisfy:
 
 #|
 
-Your property here
++ * and or 有結合率的東西
 
 |#
 
