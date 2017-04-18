@@ -51,19 +51,33 @@
 ;Exercise 3a - Define square-tree
 
 (define (square-tree d-l)
-  (error "Not yet implemented"))
+  (cond
+    ((null? d-l) '())
+    ((number? d-l) (square d-l))
+    (else (cons (square-tree (car d-l))
+                (square-tree (cdr d-l))))))
 
 ;Exercise 3b - Define tree-map
+;; Acording to TLS we should ask three questions
+
+(define atom?
+  (lambda (x)
+    (and (not (pair? x))
+         (not (null? x)))))
 
 (define (tree-map fn tree)
-  (error "Not yet implemented"))
+  (cond
+    ((null? tree) '())
+    ((atom? (car tree)) (cons (fn (car tree)) (tree-map fn (cdr tree))))
+    (else (cons (tree-map fn (car tree)) (tree-map fn (cdr tree))))))
 
 ;Exercise 4 -  Complete the definition of accumulate-n
+
 (define (accumulate-n op init seqs)
   (if (null? (car seqs))
       '()
       (cons (foldr op init "YOUR CODE HERE")
-	    (accumulate-n op init "YOUR CODE HERE"))))
+            (accumulate-n op init "YOUR CODE HERE"))))
 
 ;Exercise 5 - Complete the definitions of matrix-*-vector, transpose,
 ; and matrix-*-matrix.
@@ -93,7 +107,12 @@ Your property here
 ;Exercise 7 - Define equal?
 
 (define (my-equal? l1 l2)
-  (error "Not yet implemented"))
+  (cond
+    ((and (null? l1) (null? l2)) #t)
+    ((and (atom? l1) (atom? l2)) (eq? l1 l2))
+    ((and (pair? l1) (pair? l2)) (and (my-equal? (car l1) (car l2))
+                                      (my-equal? (cdr l1) (cdr l2))))
+    (else #f)))
 
 ;Exercise 8 - Complete the definition of subsets
 (define (subsets s)
