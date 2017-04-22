@@ -122,11 +122,13 @@
     (else #f)))
 
 ;Exercise 8 - Complete the definition of subsets
+;; 用 let + append 其實有點奸詐，不過也不算是有"狀態"
+
 (define (subsets s)
   (if (null? s)
       (list '())
       (let ((rest (subsets (cdr s))))
-        (append rest (map "YOUR CODE HERE" rest)))))
+        (append rest (map (lambda (x) (cons (car s) x)) rest)))))
 
 
 ;Exercuse 9 - Modify the calc program
