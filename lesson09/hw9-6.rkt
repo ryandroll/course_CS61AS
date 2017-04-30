@@ -8,11 +8,14 @@ Write vector-filter
 |#
 
 ;; 一定要檢查過一遍才知道要多大的新 vector
+;; 想法一：中間變量使用 vector
 ;; 再創造一個 vector 儲存 #t #f
-;; 不對，我只要在檢查的時候把 #f 存入，再把不是 #f 寫入
-;; AHA! 儲存一格中間變量 list 把檢查到的 #t 放入, 而不是 vector
-;; 因為要反映隨時的變化，使用 list 比較方便
-;; 為了增快速度，使用 cons 往前加入，append 比較花時間
+;; 不對，我只要在檢查的時候把 #f 存入，再把不是 #f 原數據寫入
+;; 想法二：中間變量使用 list
+;; AHA! 把檢查到符合的 ref 放入 list 中, 而不是 vector
+;; 因為要能隨檢查而增長，使用 list 比 vector 更好
+;; 想法三：提速
+;; 使用 cons 往前加入，append 比較花時間
 ;; 邊檢查邊計數，最後再 cons 在最前面，免去 (length list) 的計算
 
 (define (vector-filter pred vec)
