@@ -9,7 +9,6 @@ Write vector-append
 
 (define (vector-append vec1 vec2)
   (let ((l-v1 (vector-length vec1))
-        (l-v2 (vector-length vec2))
         (l-nv (+ (vector-length vec1) (vector-length vec2))))
     (define (loop newvec i)
       (cond
