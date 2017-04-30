@@ -11,8 +11,9 @@ Write vector-filter
 ;; 再創造一個 vector 儲存 #t #f
 ;; 不對，我只要在檢查的時候把 #f 存入，再把不是 #f 寫入
 ;; AHA! 儲存一格中間變量 list 把檢查到的 #t 放入, 而不是 vector
-;; 為了增快速度，使用 cons 往前加入
-;; 最後檢查完在 cons 一個檢查到的數量，減少 length(list) 的計算
+;; 因為要反映隨時的變化，使用 list 比較方便
+;; 為了增快速度，使用 cons 往前加入，append 比較花時間
+;; 邊檢查邊計數，最後再 cons 在最前面，免去 (length list) 的計算
 
 (define (vector-filter pred vec)
   (define (loop-check i t lst)
