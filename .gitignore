@@ -1,4 +1,5 @@
 ## macOS gitignore
+# Folder maintain
 *.DS_Store
 .AppleDouble
 .LSOverride
@@ -29,3 +30,12 @@ Temporary Items
 *.rkt~
 *.rkt#*
 .#*.rkt
+
+##Scheme gitignore
+*.ss~
+*.ss#*
+.#*.ss
+
+*.scm~
+*.scm#*
+.#*.scm
