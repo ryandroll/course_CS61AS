@@ -1,4 +1,4 @@
-#lang racket
+#lang lazy
 ;; Y-comninator
 
 ;; use define
@@ -29,11 +29,16 @@
 
 ;; abstract Y
 (((lambda (f)
-    ((lambda (x) (f (lambda (u) ((x x) u))))
-     (lambda (x) (f (lambda (u) ((x x) u))))))
+    ((lambda (x) (f (x x)))
+     (lambda (x) (f (x x)))))
   (lambda (leng)
     (lambda (lst)
       (cond
         ((null? lst) 0)
         (else (add1 (leng (cdr lst))))))))
  alst)
+(displayln alst)
+
+
+((λ (x) (+ 3 x))
+ 2)
