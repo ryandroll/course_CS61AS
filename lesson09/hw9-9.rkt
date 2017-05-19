@@ -52,11 +52,11 @@ CADDDAADAR
 (define (cxr-name fn)
   (define (loop cxr)
     (with-handlers
-      ([exn:fail? (lambda (exn)
-                    (let* ((exn-m (exn-message exn))
-                           (add-cxr (regexp-match #px"c[a,d]{1,4}r" exn-m))
-                           (new-cxr (append-cxr (car add-cxr) cxr)))
-                      (loop new-cxr)))])
+      ([exn:fail:contract? (lambda (exn)
+                             (let* ((exn-m (exn-message exn))
+                                    (add-cxr (regexp-match #px"c[a,d]{1,4}r" exn-m))
+                                    (new-cxr (append-cxr (car add-cxr) cxr)))
+                               (loop new-cxr)))])
       (begin (fn (cxr->lst* cxr)) cxr)))
   (loop 'cr))
 
