@@ -21,7 +21,7 @@
   (accumulate-n cons '() mat))
 
 ;; 宮轉成列、用模式匹配的暴力法、不過最大 bug 來自於此
-;; 轉換的位置一直填錯數字，有難發現
+;; 轉換的位置一直寫錯，有夠難發現
 
 (define (subgrids mat)
   (match mat
@@ -61,7 +61,7 @@
            (lst->mat l10))]))
 
 ;; 類似 interpreter，expand, 與 screen 交互執行
-;; 主體: list of list，screen 時轉換成 list of matrix
+;; 主體: list of list，screen 與輸出時轉換成 list of matrix
 ;; expand: 把 0 展開成 1-9，使用 list
 ;; screen: 過濾展開的 list of list 剩下合法的，使用陣列
 
