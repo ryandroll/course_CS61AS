@@ -25,9 +25,9 @@
 (define (two-in-a-row-p lst)
   (displayln lst)
   (match lst
-    [`(,e1 ,e2 ,e3 ...) (or (eq? e1 e2)
-                            (two-in-a-row-p (cons e2 e3)))]
-    [else #f]))
+    [(? null? lst) #f]
+    [`(,e1) #f]
+    [`(,e1 ,e2 ...) (or (eq? e1 (car e2)) (two-in-a-row-p e2))]))
 
-(define test-lst '(ao bd dd ww qq ee ee))
+(define test-lst '(ao bd dd ww qq ee de))
 (two-in-a-row-p test-lst)
