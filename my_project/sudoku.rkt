@@ -1,123 +1,85 @@
 #lang racket
 
-(require berkeley)
-(provide (all-defined-out))
+;; World's hardest sudoku
+(define quiz
+  '((8 0 0 0 0 0 0 0 0)
+    (0 0 3 6 0 0 0 0 0)
+    (0 7 0 0 9 0 2 0 0)
+    (0 5 0 0 0 7 0 0 0)
+    (0 0 0 0 4 5 7 0 0)
+    (0 0 0 1 0 0 0 3 0)
+    (0 0 1 0 0 0 0 6 8)
+    (0 0 8 5 0 0 0 1 0)
+    (0 9 0 0 0 0 4 0 0)))
 
-;; sudoku
-;; 使用 list 未知填入 0
-;; 需要下列函數
-;; 遞回填入未知參數
-;; 每行、每列、每個宮數字都要剛好不能重複
-;; 把另外兩種情況換成每一行
-
-;; 每行轉每列
-(define (accumulate-n op init seqs)
-  (if (null? (car seqs))
-      '()
-      (cons (foldr op init (map car seqs))
-            (accumulate-n op init (map cdr seqs)))))
-
-(define (transpose mat)
-  (accumulate-n cons '() mat))
-
-;; 宮轉成列、用模式匹配的暴力法、不過最大 bug 來自於此
-;; 轉換的位置一直寫錯，有夠難發現
-
-(define (subgrids mat)
-  (match mat
-    [`((,e11 ,e12 ,e13 ,e14 ,e15 ,e16 ,e17 ,e18 ,e19)
-       (,e21 ,e22 ,e23 ,e24 ,e25 ,e26 ,e27 ,e28 ,e29)
-       (,e31 ,e32 ,e33 ,e34 ,e35 ,e36 ,e37 ,e38 ,e39)
-       (,e41 ,e42 ,e43 ,e44 ,e45 ,e46 ,e47 ,e48 ,e49)
-       (,e51 ,e52 ,e53 ,e54 ,e55 ,e56 ,e57 ,e58 ,e59)
-       (,e61 ,e62 ,e63 ,e64 ,e65 ,e66 ,e67 ,e68 ,e69)
-       (,e71 ,e72 ,e73 ,e74 ,e75 ,e76 ,e77 ,e78 ,e79)
-       (,e81 ,e82 ,e83 ,e84 ,e85 ,e86 ,e87 ,e88 ,e89)
-       (,e91 ,e92 ,e93 ,e94 ,e95 ,e96 ,e97 ,e98 ,e99))
-
-     `((,e11 ,e12 ,e13 ,e21 ,e22 ,e23 ,e31 ,e32 ,e33)
-       (,e41 ,e42 ,e43 ,e51 ,e52 ,e53 ,e61 ,e62 ,e63)
-       (,e71 ,e72 ,e73 ,e81 ,e82 ,e83 ,e91 ,e92 ,e93)
-       (,e14 ,e15 ,e16 ,e24 ,e25 ,e26 ,e34 ,e35 ,e36)
-       (,e44 ,e45 ,e46 ,e54 ,e55 ,e56 ,e64 ,e65 ,e66)
-       (,e74 ,e75 ,e76 ,e84 ,e85 ,e86 ,e94 ,e95 ,e96)
-       (,e17 ,e18 ,e19 ,e27 ,e28 ,e29 ,e37 ,e38 ,e39)
-       (,e47 ,e48 ,e49 ,e57 ,e58 ,e59 ,e67 ,e68 ,e69)
-       (,e77 ,e78 ,e79 ,e87 ,e88 ,e89 ,e97 ,e98 ,e99))
-     ]))
-
-;; 陣列與 list 互相轉換：陣列方便比較、list 方便修改數據
+;; matrix 與 list 互相轉換：matrix 方便比較、list 方便修改數據
 (define (mat->lst mat)
   (match mat
     [(? null? lst) '()]
     [`(,l1 ,l2 ...)
      (append l1 (mat->lst l2))]))
 
-(define (lst->mat lst)
-  (match lst
-    [(? null? lst) '()]
-    [`(,l1 ,l2 ,l3 ,l4 ,l5 ,l6 ,l7 ,l8 ,l9 ,l10 ...)
-     (cons `(,l1 ,l2 ,l3 ,l4 ,l5 ,l6 ,l7 ,l8 ,l9)
-           (lst->mat l10))]))
+(define (make-dict ht lst1 lst2)
+  (if (null? (cdr lst1))
+      (hash-set! ht (car lst1) (car lst2))
+      (begin (hash-set! ht (car lst1) (car lst2))
+             (make-dict ht (cdr lst1) (cdr lst2)))))
 
-;; 類似 interpreter，expand, 與 screen 交互執行
-;; 主體: list of list，screen 與輸出時轉換成 list of matrix
-;; expand: 把 0 展開成 1-9，使用 list
-;; screen: 過濾展開的 list of list 剩下合法的，使用陣列
+(define sudoku-key
+  '("a1A" "a2A" "a3A" "a4B" "a5B" "a6B" "a7C" "a8C" "a9C"
+    "b1A" "b2A" "b3A" "b4B" "b5B" "b6B" "b7C" "b8C" "b9C"
+    "c1A" "c2A" "c3A" "c4B" "c5B" "c6B" "c7C" "c8C" "c9C"
+    "e1D" "e2D" "e3D" "e4E" "e5E" "e6E" "e7F" "e8F" "e9F"
+    "f1D" "f2D" "f3D" "f4E" "f5E" "f6E" "f7F" "f8F" "f9F"
+    "g1D" "g2D" "g3D" "g4E" "g5E" "g6E" "g7F" "g8F" "g9F"
+    "d1G" "d2G" "d3G" "d4H" "d5H" "d6H" "d7I" "d8I" "d9I"
+    "e1G" "e2G" "e3G" "e4H" "e5H" "e6H" "e7I" "e8I" "e9I"
+    "f1G" "f2G" "f3G" "f4H" "f5H" "f6H" "f7I" "f8I" "f9I"))
 
-;; expand
-(define (expand-unit lst)
-  (match lst
-    [`(,l1 ...  0 ,l2 ...) (map (lambda (x) (append l1 `(,x) l2))
-                                (enumerate-interval 1 9))]
-    [_ 'else]))
+(define sudoku-value
+  (mat->lst quiz))
 
-(define (expand-lst lst-of-lst)
-  (if (null? lst-of-lst)
-      '()
-      (append (expand-unit (car lst-of-lst))
-              (expand-lst (cdr lst-of-lst)))))
+(define sudoku-dict (make-hash))
+(make-dict sudoku-dict sudoku-key sudoku-value)
+(hash-iterate-first sudoku-dict)
 
-;; screen
-(define (good-lst? lst)
-  (let ((alst (filter (lambda (x) (not (= 0 x))) lst)))
-    (= (length alst) (set-count (list->set alst)))))
+(define (units elm)
+  (filter (lambda (x)
+            (regexp-match? #rx"(string (string-ref elm 0)).." ) x)
+          sudoku-key))
 
-(define (good-mat? mat)
-  (if (null? mat)
-      #t
-      (and (good-lst? (car mat))
-           (good-mat? (cdr mat)))))
 
-(define (good-sudoku? mat)
-  (and (good-mat? mat)
-       (good-mat? (subgrids mat))
-       (good-mat? (transpose mat))))
 
-(define (screen-lst lst-of-lst)
-  (filter (lambda (x) (good-sudoku? (lst->mat x))) lst-of-lst))
+(define (test lst)
+  (filter (lambda (x) (or (regexp-match? #rx"a.." x)
+                          (regexp-match? #rx".1." x)
+                          (regexp-match? #rx"..A" x)))
+          lst)
+  )
 
-;; expand screen 循環、直到沒有 0
 
-(define (main-sudoku mat)
-  (define (rec lst-of-lst)
-    (if (member? 0 (car lst-of-lst))
-        (begin
-          (displayln (length lst-of-lst)) ; 測試運作情況
-          (rec (screen-lst (expand-lst lst-of-lst))))
-        (map lst->mat lst-of-lst)))
-  (rec (list (mat->lst mat))))
+;; sudoku-dict
 
-(define quiz
-  '((0 2 9 6 0 0 8 0 1)
-    (0 6 0 0 0 0 0 0 0)
-    (0 0 0 0 9 7 0 3 0)
-    (0 0 0 8 5 2 0 0 0)
-    (8 0 5 0 0 0 0 1 0)
-    (6 0 0 0 0 0 5 4 0)
-    (5 0 0 0 2 4 0 0 0)
-    (0 8 4 1 0 0 3 0 2)
-    (0 0 0 0 0 0 0 0 4)))
+#|
+(define (subgrids mat)
+  (match mat
+    [`((,a1A ,a2A ,a3A ,a4B ,a5B ,a6B ,a7C ,a8C ,a9C)
+       (,b1A ,b2A ,b3A ,b4B ,b5B ,b6B ,b7C ,b8C ,b9C)
+       (,c1A ,c2A ,c3A ,c4B ,c5B ,c6B ,c7C ,c8C ,c9C)
+       (,e1D ,e2D ,e3D ,e4E ,e5E ,e6E ,e7F ,e8F ,e9F)
+       (,f1D ,f2D ,f3D ,f4E ,f5E ,f6E ,f7F ,f8F ,f9F)
+       (,g1D ,g2D ,g3D ,g4E ,g5E ,g6E ,g7F ,g8F ,g9F)
+       (,d1G ,d2G ,d3G ,d4H ,d5H ,d6H ,d7I ,d8I ,d9I)
+       (,e1G ,e2G ,e3G ,e4H ,e5H ,e6H ,e7I ,e8I ,e9I)
+       (,f1G ,f2G ,f3G ,f4H ,f5H ,f6H ,f7I ,f8I ,f9I))
 
-(main-sudoku quiz)
-(main-sudoku (transpose quiz))
+     `((,a1A ,a2A ,a3A ,a4B ,a5B ,a6B ,a7C ,a8C ,a9C)
+       (,b1A ,b2A ,b3A ,b4B ,b5B ,b6B ,b7C ,b8C ,b9C)
+       (,c1A ,c2A ,c3A ,c4B ,c5B ,c6B ,c7C ,c8C ,c9C)
+       (,e1D ,e2D ,e3D ,e4E ,e5E ,e6E ,e7F ,e8F ,e9F)
+       (,f1D ,f2D ,f3D ,f4E ,f5E ,f6E ,f7F ,f8F ,f9F)
+       (,g1D ,g2D ,g3D ,g4E ,g5E ,g6E ,g7F ,g8F ,g9F)
+       (,d1G ,d2G ,d3G ,d4H ,d5H ,d6H ,d7I ,d8I ,d9I)
+       (,e1G ,e2G ,e3G ,e4H ,e5H ,e6H ,e7I ,e8I ,e9I)
+       (,f1G ,f2G ,f3G ,f4H ,f5H ,f6H ,f7I ,f8I ,f9I))]))
+|#
